@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>图卷积学习之路-2（2s-AGCN） | Leniakea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://akasaka47.github.io/favicon.ico?v=1658275504855">
+<link rel="stylesheet" href="https://akasaka47.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="
+2s-AGCN 2019
+
+邻接矩阵
+双流的 2 分支
+输入数据
+源码修改
+
+配置文件
+骨骼数据生成
+网络配置
+网络模型定义
+主文件
+
+
+使用顺序
+
+
+
+
+2s-AGCN 2019
+
+Two-Stream Adaptive Graph C..." />
+    <meta name="keywords" content="图卷积,GCN" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://akasaka47.github.io">
+        <img src="https://akasaka47.github.io/images/avatar.png?v=1658275504855" class="site-logo">
+        <h1 class="site-title">Leniakea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      再不跑就来不及了
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://akasaka47.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">图卷积学习之路-2（2s-AGCN）</h2>
+            <div class="post-date">2022-07-13</div>
+            
+            <div class="post-content" v-pre>
+              <p><ul class="markdownIt-TOC">
+<li><a href="#2s-agcn-2019">2s-AGCN 2019</a>
+<ul>
+<li><a href="#%E9%82%BB%E6%8E%A5%E7%9F%A9%E9%98%B5">邻接矩阵</a></li>
+<li><a href="#%E5%8F%8C%E6%B5%81%E7%9A%84-2-%E5%88%86%E6%94%AF">双流的 2 分支</a></li>
+<li><a href="#%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE">输入数据</a></li>
+<li><a href="#%E6%BA%90%E7%A0%81%E4%BF%AE%E6%94%B9">源码修改</a>
+<ul>
+<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
+<li><a href="#%E9%AA%A8%E9%AA%BC%E6%95%B0%E6%8D%AE%E7%94%9F%E6%88%90">骨骼数据生成</a></li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE">网络配置</a></li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%AE%9A%E4%B9%89">网络模型定义</a></li>
+<li><a href="#%E4%B8%BB%E6%96%87%E4%BB%B6">主文件</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E9%A1%BA%E5%BA%8F">使用顺序</a></li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="2s-agcn-2019">2s-AGCN 2019</h1>
+<blockquote>
+<p>Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition<br>
+CVPR 2019</p>
+</blockquote>
+<p><strong>双流图卷积动作识别</strong></p>
+<p><a href="https://arxiv.org/abs/1805.07694">论文地址</a><br>
+<a href="https://github.com/lshiwjx/2s-AGCN">源码地址</a><br>
+<a href="https://zhuanlan.zhihu.com/p/179956749">论文解读</a></p>
+<figure data-type="image" tabindex="1"><img src="https://s2.loli.net/2022/07/13/DU9b6QHLjaA1kmv.png" alt="2s-AGCN_1.png" loading="lazy"></figure>
+<hr>
+<h2 id="邻接矩阵">邻接矩阵</h2>
+<figure data-type="image" tabindex="2"><img src="https://s2.loli.net/2022/07/13/3ETcSAxCJwfrqD9.png" alt="2s-AGCN-邻接矩阵.png" loading="lazy"></figure>
+<ul>
+<li>A：与 ST-GCN 相同，规定了物理存在的连接</li>
+<li>B：一个 N*N 的矩阵，参数无约束条件，完全由网络学习得到，可以创造不存在的连接</li>
+<li>C：对每一个样本学习一个独有的图，有归一化处理，范围在 0~1</li>
+</ul>
+<hr>
+<h2 id="双流的-2-分支">双流的 2 分支</h2>
+<ul>
+<li>流 1
+<ul>
+<li>与 ST-GCN 相同，骨架的节点数据</li>
+</ul>
+</li>
+<li>流 2
+<ul>
+<li>输入数据：骨骼的长度和方向</li>
+<li>手的 21 点，以手腕处的点为中心点，每个骨骼靠近中心点的关节为出发点，另一个为终点</li>
+<li>可得到骨骼向量，以向量的长度和方向作为输入数据</li>
+<li>关节数比骨骼数多 1，添加一个空骨骼，使骨骼数据维度与关节维度相同</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="输入数据">输入数据</h2>
+<ul>
+<li><code>N：Batch Size</code></li>
+<li><code>C：channels</code> 通道数，这里 3 通道，对应 X 坐标，Y 坐标，置信度</li>
+<li><code>T：Frames' Number</code> 骨架图数</li>
+<li><code>V：Joints‘ Number</code> 一张骨架图内，节点数</li>
+<li><code>M：People's Number</code> 一张骨架图内，人数</li>
+</ul>
+<hr>
+<h2 id="源码修改">源码修改</h2>
+<p>以 <code>NTU-RGB-D</code> 网络为基础进行修改</p>
+<h3 id="配置文件">配置文件</h3>
+<p><code>config/nturgbd-cross-view/train_joint.yaml</code></p>
+<pre><code class="language-py"># 训练关节
+
+work_dir: './work_dir/{...}/agcn_bone'     # 括号内填自定义数据集名称，如 piano_finger
+model_saved_name: './runs/{...}_agcn_bone'
+
+train_feeder_args:
+  data_path: './data/{...}/train_data_bone.npy'
+  label_path: './data/{...}/train_label.pkl'
+
+test_feeder_args:
+  data_path: './data/{...}/val_data_bone.npy'
+  label_path: './data/{...}/val_label.pkl'
+
+model_args:
+  num_class: 10   # 10根手指
+  num_point: 42   # 一只手21个关节点，2只手共计42个关节点
+  num_person: 1
+
+device: [0, 1, 2, 3]    # 多GPU环境下，选择使用哪些GPU
+batch_size: 256         # 根据硬件配置，选择合适的batch_size
+test_batch_size: 256
+num_epoch: 50           # 迭代次数
+</code></pre>
+<p><code>config/nturgbd-cross-view/train_bone.yaml</code><br>
+<code>config/nturgbd-cross-view/test_joint.yaml</code><br>
+<code>config/nturgbd-cross-view/test_bone.yaml</code></p>
+<p>修改基本同上</p>
+<hr>
+<h3 id="骨骼数据生成">骨骼数据生成</h3>
+<p><code>data_gen/gen_bone_data.py</code></p>
+<pre><code class="language-py">paris = {
+    # 设置手骨架
+    # 设置节点的连接顺序
+    # (x, y): x远离中心点，y靠近中心点
+    'piano_finger': (
+        (17, 0), (13, 0), (9, 0), (5, 0), (1, 0),
+        (18, 17), (14, 13), (10, 9), (6, 5), (2, 1),
+        (19, 18), (15, 14), (11, 10), (7, 6), (3, 2),
+        (20, 19), (16, 15), (12, 11), (8, 7), (4, 3),
+        (22, 21), (26, 21), (30, 21), (34, 21), (38, 21),
+        (23, 22), (27, 26), (31, 30), (35, 34), (39, 38),
+        (24, 23), (28, 27), (32, 31), (36, 35), (40, 39),
+        (25, 24), (29, 28), (33, 32), (37, 36), (41, 40)
+    ),
+}
+
+datasets = {
+    'piano_finger',
+}
+
+</code></pre>
+<hr>
+<h3 id="网络配置">网络配置</h3>
+<p><code>graph/ntu_rgb_d.py</code></p>
+<pre><code class="language-py"># 设置手骨架
+# 设置节点的连接顺序
+# (x, y): x远离中心点，y靠近中心点
+
+num_node = 42
+self_link = [(i, i) for i in range(num_node)]
+
+inward = [(17, 0), (13, 0), (9, 0), (5, 0), (1, 0),
+          (18, 17), (14, 13), (10, 9), (6, 5), (2, 1),
+          (19, 18), (15, 14), (11, 10), (7, 6), (3, 2),
+          (20, 19), (16, 15), (12, 11), (8, 7), (4, 3),
+          (22, 21), (26, 21), (30, 21), (34, 21), (38, 21),
+          (23, 22), (27, 26), (31, 30), (35, 34), (39, 38), 
+          (24, 23), (28, 27), (32, 31), (36, 35), (40, 39), 
+          (25, 24), (29, 28), (33, 32), (37, 36), (41, 40)]
+</code></pre>
+<p>手骨架图如下所示</p>
+<figure data-type="image" tabindex="3"><img src="https://s2.loli.net/2022/07/14/K1IBcUw24DMH5YX.png" alt="手骨架.png" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://s2.loli.net/2022/07/14/8DciE5G1TM9xv6Q.png" alt="hand-简笔画.png" loading="lazy"></figure>
+<hr>
+<h3 id="网络模型定义">网络模型定义</h3>
+<p><code>model/agcn.py</code></p>
+<pre><code class="language-py">class Model(nn.Module):
+    # ----------------------------------------------------------------
+    # 原代码
+    # def __init__(self, 
+    #             num_class=60, 
+    #             num_point=25, 
+    #             num_person=2, 
+    #             graph=None, 
+    #             graph_args=dict(), 
+    #             in_channels=3):
+    # ----------------------------------------------------------------
+    def __init__(self, 
+                num_class=10, 
+                num_point=42, 
+                num_person=1, 
+                graph=None, 
+                graph_args=dict(), 
+                in_channels=3):
+
+    # 最后面部分
+    sigmoid = nn.Sigmoid()      # BCEloss需要将数据约束在0~1范围内
+    return sigmoid(self.fc(x))
+</code></pre>
+<hr>
+<h3 id="主文件">主文件</h3>
+<p><code>main.py</code></p>
+<pre><code class="language-py"># ----------------------------------------------------------------
+# 网络训练
+
+def train(self, epoch, save_model=False):
+    self.model.train()
+    self.print_log('Training epoch: {}'.format(epoch + 1))
+    loader = self.data_loader['train']
+    self.adjust_learning_rate(epoch)
+    # for name, param in self.model.named_parameters():
+    #     self.train_writer.add_histogram(name, param.clone().cpu().data.numpy(), epoch)
+    loss_value = []
+    self.train_writer.add_scalar('epoch', epoch, self.global_step)
+    self.record_time()
+    timer = dict(dataloader=0.001, model=0.001, statistics=0.001)
+    process = tqdm(loader)
+    if self.arg.only_train_part:
+        if epoch &gt; self.arg.only_train_epoch:
+            print('only train part, require grad')
+            for key, value in self.model.named_parameters():
+                if 'PA' in key:
+                    value.requires_grad = True
+                    # print(key + '-require grad')
+        else:
+            print('only train part, do not require grad')
+            for key, value in self.model.named_parameters():
+                if 'PA' in key:
+                    value.requires_grad = False
+                    # print(key + '-not require grad')
+    for batch_idx, (data, label, index) in enumerate(process):
+        self.global_step += 1
+        # get data
+        data = Variable(data.float().cuda(
+            self.output_device), requires_grad=False)
+
+        # --------------------------------------------------------
+        # label转为tensor(batch_size, 10)
+        # 很奇怪，不知道为什么，label的维度是(10, batch_size)，而且是10个batch_size长度的一维tensor
+        l = torch.zeros(size=[len(label[0]), len(label)])
+        for i in range(len(label[0])):
+            for j in range(len(label)):
+                l[i][j] = label[j][i]
+        label = l
+
+        # ----------------------------------------------------------
+
+        label = Variable(label.float().cuda(
+            self.output_device), requires_grad=False)
+        # label = label.T
+        # label = Variable(label.long().cuda(self.output_device), requires_grad=False)
+        timer['dataloader'] += self.split_time()
+
+        # forward
+        output = self.model(data)
+
+        # if batch_idx == 0 and epoch == 0:
+        #     self.train_writer.add_graph(self.model, output)
+        if isinstance(output, tuple):
+            output, l1 = output
+            l1 = l1.mean()
+        else:
+            l1 = 0
+        # print(output.size())
+        # print(label.size())
+        loss = self.loss(output, label) + l1
+
+        # backward
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        loss_value.append(loss.data.item())
+        timer['model'] += self.split_time()
+
+        # ----------------------------------------------------------
+        # 计算准确率
+        # 原代码
+        # value, predict_label = torch.max(output.data, 1)
+        # acc = torch.mean((predict_label == label.data).float())
+        # ----------------------------------------------------------
+        acc = 0
+
+        # ----------------------------------------------------------
+
+        self.train_writer.add_scalar('acc', acc, self.global_step)
+        self.train_writer.add_scalar(
+            'loss', loss.data.item(), self.global_step)
+        self.train_writer.add_scalar('loss_l1', l1, self.global_step)
+        # self.train_writer.add_scalar('batch_time', process.iterable.last_duration, self.global_step)
+
+        # statistics
+        self.lr = self.optimizer.param_groups[0]['lr']
+        self.train_writer.add_scalar('lr', self.lr, self.global_step)
+        # if self.global_step % self.arg.log_interval == 0:
+        #     self.print_log(
+        #         '\tBatch({}/{}) done. Loss: {:.4f}  lr:{:.6f}'.format(
+        #             batch_idx, len(loader), loss.data[0], lr))
+        timer['statistics'] += self.split_time()
+
+    # statistics of time consumption and loss
+    proportion = {
+        k: '{:02d}%'.format(int(round(v * 100 / sum(timer.values()))))
+        for k, v in timer.items()
+    }
+    self.print_log(
+        '\tMean training loss: {:.4f}.'.format(np.mean(loss_value)))
+    self.print_log(
+        '\tTime consumption: [Data]{dataloader}, [Network]{model}'.format(
+            **proportion))
+
+    if save_model:
+        state_dict = self.model.state_dict()
+        weights = OrderedDict([[k.split('module.')[-1],
+                                v.cpu()] for k, v in state_dict.items()])
+
+        torch.save(weights, self.arg.model_saved_name + '-' +
+                    str(epoch) + '-' + str(int(self.global_step)) + '.pt')
+
+# ------------------------------------------------------------------
+# 网络测试
+
+def eval(self, epoch, save_score=False, 
+        loader_name=['test'], 
+        wrong_file=None, 
+        result_file=None):
+    if wrong_file is not None:
+        f_w = open(wrong_file, 'w')
+    if result_file is not None:
+        f_r = open(result_file, 'w')
+    self.model.eval()
+    self.print_log('Eval epoch: {}'.format(epoch + 1))
+    for ln in loader_name:
+        loss_value = []
+        score_frag = []
+        right_num_total = 0
+        total_num = 0
+        loss_total = 0
+        step = 0
+        # ----------------------------------------------------------
+        # 计算F1
+        TP = 0
+        FP = 0
+        TN = 0
+        FN = 0
+        # ----------------------------------------------------------
+        process = tqdm(self.data_loader[ln])
+        for batch_idx, (data, label, index) in enumerate(process):
+            with torch.no_grad():
+                data = Variable(
+                    data.float().cuda(self.output_device),
+                    requires_grad=False)
+
+                l = torch.zeros(size=[len(label[0]), len(label)])
+                for i in range(len(label[0])):
+                    for j in range(len(label)):
+                        l[i][j] = label[j][i]
+                label = l
+
+                label = Variable(
+                    label.float().cuda(self.output_device),
+                    requires_grad=False)
+                output = self.model(data)
+                if isinstance(output, tuple):
+                    output, l1 = output
+                    l1 = l1.mean()
+                else:
+                    l1 = 0
+                loss = self.loss(output, label)
+                score_frag.append(output.data.cpu().numpy())
+                loss_value.append(loss.data.item())
+
+                # _, predict_label = torch.max(output.data, 1)
+                predict_label = output.data.ge(0.5)
+                step += 1
+
+                # t = torch.ones(label.size()).cpu()
+
+                # print('label-tf: ', label.cpu().eq(t))
+
+                #--------------------------------------------------------------
+                # 计算F1
+                label = label.ge(0.5)
+
+                TP = torch.nonzero(label &amp; predict_label == True).size(0)
+                FP = torch.nonzero(~label &amp; predict_label == True).size(0)
+                TN = torch.nonzero(~label &amp; ~predict_label == True).size(0)
+                FN = torch.nonzero(label &amp; ~predict_label == True).size(0)
+
+                #--------------------------------------------------------------
+
+            # if wrong_file is not None or result_file is not None:
+            #     predict = list(predict_label.cpu().numpy())
+            #     true = list(label.data.cpu().numpy())
+            #     for i, x in enumerate(predict):
+            #         if result_file is not None:
+            #             f_r.write(str(x) + ',' + str(true[i]) + '\n')
+            #         if x != true[i] and wrong_file is not None:
+            #             f_w.write(str(index[i]) + ',' +
+            #                       str(x) + ',' + str(true[i]) + '\n')
+
+        #-------------------------------------------------------------
+        # 计算F1
+        accuracy = (TP+TN)/(TP+FP+TN+FN+1)
+        precision = (TP)/(TP+FP+1)
+        recall = (TP)/(TP+FN+1)
+        F1 = 2*precision*recall/(precision+recall+1)
+
+        print('\naccuracy:\t', accuracy)
+        print('precision:\t', precision)
+        print('recall:\t\t', recall)
+        print('F1:\t\t', F1, '\n')
+        #-------------------------------------------------------------
+
+        score = np.concatenate(score_frag)
+        # loss = np.mean(loss_value)
+        # accuracy = self.data_loader[ln].dataset.top_k(score, 1)
+        if accuracy &gt; self.best_acc:
+            self.best_acc = accuracy
+        # # self.lr_scheduler.step(loss)
+        # print('Accuracy: ', accuracy, ' model: ', self.arg.model_saved_name)
+        # if self.arg.phase == 'train':
+        #     self.val_writer.add_scalar('loss', loss, self.global_step)
+        #     self.val_writer.add_scalar('loss_l1', l1, self.global_step)
+        #     self.val_writer.add_scalar('acc', accuracy, self.global_step)
+
+        score_dict = dict(
+            zip(self.data_loader[ln].dataset.sample_name, score))
+        self.print_log('\tMean {} loss of {} batches: {}.'.format(
+            ln, len(self.data_loader[ln]), np.mean(loss_value)))
+        for k in self.arg.show_topk:
+            self.print_log('\tTop{}: {:.2f}%'.format(
+                k, 100 * self.data_loader[ln].dataset.top_k(score, k)))
+
+        if save_score:
+            with open('{}/epoch{}_{}_score.pkl'.format(
+                    self.arg.work_dir, epoch + 1, ln), 'wb') as f:
+                pickle.dump(score_dict, f)
+</code></pre>
+<hr>
+<h2 id="使用顺序">使用顺序</h2>
+<ul>
+<li>将关节数据生成为骨骼数据</li>
+</ul>
+<pre><code class="language-sh">python data_gen/gen_bone_data.py
+</code></pre>
+<ul>
+<li>分别将关节和骨骼的时空数据送入 J-stream 和 B-stream，训练</li>
+</ul>
+<pre><code class="language-sh">python main.py --config ./config/nturgbd-cross-view/train_joint.yaml
+python main.py --config ./config/nturgbd-cross-view/train_bone.yaml
+</code></pre>
+<ul>
+<li>测试，产生各自 softmax 分数</li>
+</ul>
+<pre><code class="language-sh">python main.py --config ./config/nturgbd-cross-view/test_joint.yaml
+python main.py --config ./config/nturgbd-cross-view/test_bone.yaml
+</code></pre>
+<ul>
+<li>两个 softmax 分数相加 to obtain the fused score and predictthe action label</li>
+</ul>
+<pre><code class="language-sh">python ensemble.py --datasets piano_finger
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://akasaka47.github.io/tag/18l7LEU46/" class="tag">
+                    图卷积
+                  </a>
+                
+                  <a href="https://akasaka47.github.io/tag/L6So2YhSqH/" class="tag">
+                    GCN
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://akasaka47.github.io/post/gcn-xue-xi-zhi-lu-1-st-gcn/">
+                  <h3 class="post-title">
+                    图卷积学习之路-1（ST-GCN）
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

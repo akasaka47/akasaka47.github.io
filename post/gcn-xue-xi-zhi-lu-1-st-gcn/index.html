@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>图卷积学习之路-1（ST-GCN） | Leniakea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://akasaka47.github.io/favicon.ico?v=1658275504855">
+<link rel="stylesheet" href="https://akasaka47.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="
+ST-GCN 2018
+
+邻接矩阵
+空间-分区策略
+时间-关节卷积
+网络输入数据
+钢琴数据集格式
+ST-GCN的缺点
+
+
+
+
+ST-GCN 2018
+
+Spatial Temporal Graph Convolutional Networ..." />
+    <meta name="keywords" content="图卷积,GCN" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://akasaka47.github.io">
+        <img src="https://akasaka47.github.io/images/avatar.png?v=1658275504855" class="site-logo">
+        <h1 class="site-title">Leniakea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      再不跑就来不及了
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://akasaka47.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">图卷积学习之路-1（ST-GCN）</h2>
+            <div class="post-date">2022-07-13</div>
+            
+            <div class="post-content" v-pre>
+              <p><ul class="markdownIt-TOC">
+<li><a href="#st-gcn-2018">ST-GCN 2018</a>
+<ul>
+<li><a href="#%E9%82%BB%E6%8E%A5%E7%9F%A9%E9%98%B5">邻接矩阵</a></li>
+<li><a href="#%E7%A9%BA%E9%97%B4-%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5">空间-分区策略</a></li>
+<li><a href="#%E6%97%B6%E9%97%B4-%E5%85%B3%E8%8A%82%E5%8D%B7%E7%A7%AF">时间-关节卷积</a></li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE">网络输入数据</a></li>
+<li><a href="#%E9%92%A2%E7%90%B4%E6%95%B0%E6%8D%AE%E9%9B%86%E6%A0%BC%E5%BC%8F">钢琴数据集格式</a></li>
+<li><a href="#st-gcn%E7%9A%84%E7%BC%BA%E7%82%B9">ST-GCN的缺点</a></li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="st-gcn-2018">ST-GCN 2018</h1>
+<blockquote>
+<p>Spatial Temporal Graph Convolutional Networks for Skeleton Based Action Recognition<br>
+AAAI 2018</p>
+</blockquote>
+<p><strong>基于时空图卷积的动作识别</strong></p>
+<p><a href="https://arxiv.org/abs/1801.07455">论文地址</a><br>
+<a href="https://github.com/yysijie/st-gcn">源码地址</a><br>
+<a href="https://blog.csdn.net/qq_42599237/article/details/111566607?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-4-111566607-blog-117884471.pc_relevant_multi_platform_whitelistv2&amp;spm=1001.2101.3001.4242.3&amp;utm_relevant_index=6">论文解读</a></p>
+<figure data-type="image" tabindex="1"><img src="https://s2.loli.net/2022/07/13/4NgVZyzHwa8ftUG.png" alt="stgcn_1.png" loading="lazy"></figure>
+<hr>
+<h2 id="邻接矩阵">邻接矩阵</h2>
+<p>表示图内各节点之间的连接关系</p>
+<p>例：无向图内有3个节点，邻接矩阵如下所示</p>
+<pre><code>0   1   1
+1   0   0
+1   0   0
+</code></pre>
+<p>表示1和2、3节点有连接</p>
+<p>图内节点数为N，则邻接矩阵维度为N*N<br>
+通过调整邻接矩阵元素的值，可以控制节点是否连接，以及节点连接的权重</p>
+<hr>
+<h2 id="空间-分区策略">空间-分区策略</h2>
+<figure data-type="image" tabindex="2"><img src="https://s2.loli.net/2022/07/13/fnOBltpREDC7ySh.png" alt="stgcn_2.png" loading="lazy"></figure>
+<ol>
+<li>简单分区：所有节点都为一个索引，上图 ( b )，绿色全部为同一组节点；</li>
+<li>距离分区：通过不同距离，将一个图（如人体骨骼）按照与目标节点的距离分为几部分，上图 ( c ），绿色是距离为0的节点，也就是节点本身，蓝色是距离为1的邻居节点，也就是与其直接相连的节点；</li>
+<li>空间配置分区：通过对于目标节点而言近心端和远心端的节点进行分区，上图 ( d )，绿色是节点本身，蓝色是比原节点更接近重心的邻居节点集，黄色是远离重心的邻居节点集。</li>
+</ol>
+<p>ST-GCN同时使用了3种策略来学习网络参数</p>
+<hr>
+<h2 id="时间-关节卷积">时间-关节卷积</h2>
+<figure data-type="image" tabindex="3"><img src="https://s2.loli.net/2022/07/13/v2eHJZapAUEtPkQ.png" alt="stgcn_3.png" loading="lazy"></figure>
+<p>在连续帧中找到相同节点，并将其连成时域信息</p>
+<p>对每一帧，选择前后各2帧，共计5帧骨架，对同一节点在5帧上的位置进行学习</p>
+<hr>
+<h2 id="网络输入数据">网络输入数据</h2>
+<p>整个网络的输入是一个<code>(N = batch_size, C = 3 ,T = 300, V = 18, M = 2)</code>的tensor</p>
+<ul>
+<li>N = 64 batch_size</li>
+<li>C = 3 (X,Y,S) 代表一个点的信息（X坐标、Y坐标、置信度）</li>
+<li>T = 300 一个视频的帧数paper规定是300帧，不足的重头循环，多的clip</li>
+<li>V = 18 根据不同的skeleton获得的节点数而定，coco是18个节点</li>
+<li>M = 2 人数，paper中将人数限定在最大2个人</li>
+</ul>
+<hr>
+<h2 id="钢琴数据集格式">钢琴数据集格式</h2>
+<ul>
+<li><code>data_numpy: (8, 3, 5, 42, 1)</code>  5张骨架图，对应时间维度；一只手有21个骨架点，2只手共计42个点</li>
+<li><code>rgb_data: (8, 5, 3, 160, 672)</code>  3为RGB3通道；160*672为图片统一resize后的维度</li>
+<li><code>multiLabel: (8, 88)</code> 88个钢琴按键</li>
+<li><code>finger_label: (8, 10)</code> 10个手指</li>
+</ul>
+<hr>
+<h2 id="st-gcn的缺点">ST-GCN的缺点</h2>
+<ul>
+<li>ST-GCN的注意力机制灵活性不够，掩码是与邻接矩阵直接相乘
+<ul>
+<li>这里说的相乘是按元素相乘，并不是矩阵相乘。</li>
+<li>这就造成一个现象，就是如果邻接矩阵里面部分元素为0，那么无论对应元素为何值，最后结果都是0。</li>
+<li>换句话说就是不会创造不存在的连接，比如对于“行走”动作，手和腿的联系很大，但是手和腿没有直接相连，所以效果不好。</li>
+</ul>
+</li>
+<li>ST-GCN的第二个缺点就是没有利用骨骼数据的第二特征，
+<ul>
+<li>这里第一特征就是关节坐标，第二特征就是骨骼的长度和方向。</li>
+<li>直觉上，第二特征也包含了丰富的行为信息。</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://akasaka47.github.io/tag/18l7LEU46/" class="tag">
+                    图卷积
+                  </a>
+                
+                  <a href="https://akasaka47.github.io/tag/L6So2YhSqH/" class="tag">
+                    GCN
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://akasaka47.github.io/post/ant-design-pro-mo-gai/">
+                  <h3 class="post-title">
+                    Ant Design Pro 修改
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

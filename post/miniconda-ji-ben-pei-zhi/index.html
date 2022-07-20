@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>MiniConda 基本配置 | Leniakea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://akasaka47.github.io/favicon.ico?v=1658275504855">
+<link rel="stylesheet" href="https://akasaka47.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="官方网站
+miniconda下载地址
+准备
+更换源
+# 清华源
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+con..." />
+    <meta name="keywords" content="conda" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://akasaka47.github.io">
+        <img src="https://akasaka47.github.io/images/avatar.png?v=1658275504855" class="site-logo">
+        <h1 class="site-title">Leniakea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      再不跑就来不及了
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://akasaka47.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">MiniConda 基本配置</h2>
+            <div class="post-date">2022-05-24</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="官方网站">官方网站</h2>
+<p><a href="https://docs.conda.io/en/latest/miniconda.html">miniconda下载地址</a></p>
+<h2 id="准备">准备</h2>
+<p>更换源</p>
+<pre><code># 清华源
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+
+# 北京外国语大学
+conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/main
+conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/r
+conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/msys2
+conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/cloud
+
+# 源生效
+conda config --set show_channel_urls yes
+
+# 查看已有源
+conda config --get channels
+</code></pre>
+<h2 id="环境">环境</h2>
+<p>查看环境</p>
+<pre><code>conda env list
+</code></pre>
+<p>创建环境</p>
+<pre><code>conda create -n [环境名] python=[版本号]
+</code></pre>
+<p>删除环境</p>
+<pre><code>conda remove -n [环境名] --all
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://akasaka47.github.io/tag/RcIRIG9-O/" class="tag">
+                    conda
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://akasaka47.github.io/post/ant-design-pro-ru-men/">
+                  <h3 class="post-title">
+                    Ant Design Pro 入门
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

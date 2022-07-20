@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>.gitignore用法 | Leniakea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://akasaka47.github.io/favicon.ico?v=1658275504855">
+<link rel="stylesheet" href="https://akasaka47.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Git 忽略规则优先级
+在 .gitingore 文件中，每一行指定一个忽略规则，Git 检查忽略规则的时候有多个来源，它的优先级如下（由高到低）：
+
+从命令行中读取可用的忽略规则
+当前目录定义的规则
+父级目录定义的规则，依次递推
+$GIT..." />
+    <meta name="keywords" content="git" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://akasaka47.github.io">
+        <img src="https://akasaka47.github.io/images/avatar.png?v=1658275504855" class="site-logo">
+        <h1 class="site-title">Leniakea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      再不跑就来不及了
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://akasaka47.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">.gitignore用法</h2>
+            <div class="post-date">2022-05-14</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="git-忽略规则优先级">Git 忽略规则优先级</h1>
+<p>在 .gitingore 文件中，每一行指定一个忽略规则，Git 检查忽略规则的时候有多个来源，它的优先级如下（由高到低）：</p>
+<ul>
+<li>从命令行中读取可用的忽略规则</li>
+<li>当前目录定义的规则</li>
+<li>父级目录定义的规则，依次递推</li>
+<li>$GIT_DIR/info/exclude 文件中定义的规则</li>
+<li>core.excludesfile中定义的全局规则</li>
+</ul>
+<h1 id="git-忽略规则匹配语法">Git 忽略规则匹配语法</h1>
+<p>在 .gitignore 文件中，每一行的忽略规则的语法如下：</p>
+<ul>
+<li>空格不匹配任意文件，可作为分隔符，可用反斜杠转义</li>
+<li>! 开头的模式标识否定，该文件将会再次被包含，如果排除了该文件的父级目录，则使用 ! 也不会再次被包含。可以使用反斜杠进行转义</li>
+<li>/ 结束的模式只匹配文件夹以及在该文件夹路径下的内容，但是不匹配该文件</li>
+<li>/ 开始的模式匹配项目跟目录</li>
+<li>如果一个模式不包含斜杠，则它匹配相对于当前 .gitignore 文件路径的内容，如果该模式不在 .gitignore 文件中，则相对于项目根目录</li>
+<li>** 匹配多级目录，可在开始，中间，结束</li>
+<li>? 通用匹配单个字符</li>
+<li>[] 通用匹配单个字符列表</li>
+</ul>
+<h1 id="常用匹配示例">常用匹配示例</h1>
+<ul>
+<li>bin/: 忽略当前路径下的bin文件夹，该文件夹下的所有内容都会被忽略，不忽略 bin 文件</li>
+<li>/bin: 忽略根目录下的bin文件</li>
+<li>/<em>.c: 忽略 cat.c，不忽略 build/cat.c</em></li>
+<li><em>debug/</em>.obj: 忽略 debug/io.obj，不忽略 debug/common/io.obj 和 tools/debug/io.obj</li>
+<li>**/foo: 忽略/foo, a/foo, a/b/foo等</li>
+<li><strong>a/</strong>/b: 忽略a/b, a/x/b, a/x/y/b等</li>
+<li>!/bin/run.sh: 不忽略 bin 目录下的 run.sh 文件</li>
+<li>*.log: 忽略所有 .log 文件</li>
+<li>config.php: 忽略当前路径的 config.php 文件</li>
+</ul>
+<h1 id="gitignore规则不生效">.gitignore规则不生效</h1>
+<p>.gitignore只能忽略那些原来没有被track的文件，如果某些文件已经被纳入了版本管理中，则修改.gitignore是无效的。</p>
+<p>解决方法就是先把本地缓存删除（改变成未track状态），然后再提交:</p>
+<pre><code class="language-bash">git rm -r --cached .
+git add .
+git commit -m 'update .gitignore'
+</code></pre>
+<p>你想添加一个文件到Git，但发现添加不了，原因是这个文件被.gitignore忽略了：</p>
+<pre><code class="language-bash">$ git add App.class
+The following paths are ignored by one of your .gitignore files:
+App.class
+Use -f if you really want to add them.
+</code></pre>
+<p>如果你确实想添加该文件，可以用-f强制添加到Git：</p>
+<pre><code class="language-bash">$ git add -f App.class
+</code></pre>
+<p>或者你发现，可能是.gitignore写得有问题，需要找出来到底哪个规则写错了，可以用git check-ignore命令检查：</p>
+<pre><code class="language-bash">$ git check-ignore -v App.class
+.gitignore:3:*.class    App.class
+</code></pre>
+<p>Git会告诉我们，.gitignore的第3行规则忽略了该文件，于是我们就可以知道应该修订哪个规则。</p>
+<hr>
+<p>转自CSDN：<a href="https://blog.csdn.net/zh854663752/article/details/83352285">原文链接</a></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://akasaka47.github.io/tag/v-kfavqMs/" class="tag">
+                    git
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>
